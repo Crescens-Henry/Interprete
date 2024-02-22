@@ -82,21 +82,28 @@ function validacion(codigo) {
   pila[1] = "A";
 
   const pushInfo = (X) => {
+    console.log("Push:", X);
+
     infoPila.push(`Push: ${X} -- ${codigo.slice(contador)}`);
   };
 
   const popInfo = (X) => {
+    console.log("Pop:", X);
     infoPila.push(`Pop: ${X} --  ${codigo.slice(contador)}`);
   };
 
   while (pila.length > 0) {
     const X = pila.pop();
 
+    console.log("X:", X);
+    console.log("Pila:", pila);
+
     if (!X) {
       break;
     }
 
     const a = codigo[contador];
+    console.log("a:", a);
 
     if (X === "$") {
       infoPila.push("Completo.");
@@ -105,9 +112,6 @@ function validacion(codigo) {
 
     if (X === a) {
       contador++;
-      if (a === ";") {
-        break;
-      }
     } else if (esNoTerminal(X)) {
       const produccion = obtenerProduccion(X, a);
 
@@ -134,25 +138,23 @@ function validacion(codigo) {
 }
 
 function esNoTerminal(simbolo) {
-  return /[A-Z]/.test(simbolo);
+  const terminales = ["let", ";", "[", ",", "]"];
+  return !terminales.includes(simbolo);
 }
-
 function obtenerProduccion(noTerminal, siguiente) {
+  console.log("Siguiente:", siguiente);
+
   const producciones = {
-    A: ["T", "N"],
-    T: ["l", "e", "t", "N"],
-    N: ["L", "R"],
-
-    M: ["[", "E", "]", ";"],
-    E: ["D", "C"],
-    C: siguiente === "," ? ["X"] : ["ε"],
-    X: siguiente === "," ? [",", "D", "C"] : ["ε"],
-    COMA: [","],
-
-    R: /[a-z]/.test(siguiente) ? ["L", "R"] : ["M"],
-    L: /[a-z]/.test(siguiente) ? [siguiente] : ["ε"],
+    A: ["T", "N", "M", ";"],
+    T: ["l", "e", "t"],
+    N: /[a-z]/.test(siguiente) ? ["L", "R"] : null,
+    L: /[a-z]/.test(siguiente) ? [siguiente] : null,
+    R: /[a-z]/.test(siguiente) ? ["L", "R"] : ["ε"],
+    M: ["[", "E", "]"],
+    E: ["D", "C", "X"],
     D: /[0-9]/.test(siguiente) ? [siguiente] : null,
-    PUNTO_Y_COMA: [";"],
+    C: /[0-9]/.test(siguiente) ? ["D", "C"] : ["ε"],
+    X: siguiente === "," ? [",", "D", "C", "X"] : ["ε"],
   };
 
   return producciones[noTerminal];
